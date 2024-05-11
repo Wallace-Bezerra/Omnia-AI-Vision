@@ -1,17 +1,18 @@
 # Omnia AI Vision: Veja o mundo com novos olhos! 👁️🌎
 
-<div>
-  <p style="display: flex; align-items: center; gap: 20px; font-size: 24px;">
-   <img alt="image-00" width="80px" src="./.github/icone.png"/>
-   Traduza objetos do mundo real instantaneamente com o poder da IA e expanda seus horizontes!
-  <p>
-<div>
+## Traduza objetos do mundo real instantaneamente com o poder da IA e expanda seus horizontes!
+
+<img alt="image-00" width="120px" src="./.github/icone.png"/>
 
 ## Imagens e video do aplicativo:
 
+
+
+
+https://github.com/Wallace-Bezerra/Omnia-AI-Vision/assets/89711908/f0eb2144-6fb9-47d4-b345-21cf62128bb2
+
 <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
   <img alt="image-00" width="200px" src="./.github/tela1.png"/>
-  <video src="./.github/video1.mp4" width="200" height="100%" controls></video>
   <img alt="image-00" width="200px" src="./.github/tela2.png"/>
   <img alt="image-00" width="200px" src="./.github/tela3.png"/>
   <img alt="image-00" width="200px" src="./.github/tela4.png"/>
