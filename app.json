@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tensorflow",
-    "slug": "tensorflow",
+    "name": "omnia-ai-vision",
+    "slug": "omnia-ai-vision",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

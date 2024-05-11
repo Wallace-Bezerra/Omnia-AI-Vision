@@ -7,21 +7,15 @@ import {
   View,
   Image,
   ActivityIndicator,
-  ScrollView,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
 import AudioIcon from "./assets/icons/audio-icon.svg";
 
-import { Button } from "./components/Button";
 import {
-  Classification,
-  ClassificationProps,
-} from "./components/Classification";
-import BottomSheet, {
   BottomSheetModal,
-  BottomSheetView,
   BottomSheetModalProvider,
   BottomSheetBackdrop,
   BottomSheetScrollView,
@@ -33,29 +27,30 @@ import { genAI } from "./lib/gemini";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { Results } from "./types/types";
+import { iconLanguage } from "./utils/getIcon";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState("");
 
   const tags = {
-    English: "en",
-    Spanish: "es",
-    French: "fr",
-    German: "de",
-    Chinese: "zh",
-    "portugues-br": "pt",
-    "portugues-pt": "pt",
-    Italian: "it",
-    Russian: "ru",
-    Japanese: "ja",
-    Korean: "ko",
-    Arabic: "ar",
-    hindi: "hi",
-    Turkish: "tr",
-    Polish: "pl",
-    Dutch: "nl",
-    Indonesian: "id",
+    Inglês: "en",
+    Espanhol: "es",
+    Francês: "fr",
+    Alemão: "de",
+    Chinês: "zh",
+    "Português (BR)": "pt",
+    "Português (PT)": "pt",
+    Italiano: "it",
+    Russo: "ru",
+    Japonês: "ja",
+    Coreano: "ko",
+    Árabe: "ar",
+    Indiano: "hi",
+    Turco: "tr",
+    Polonês: "pl",
+    Holandês: "nl",
+    Indonésio: "id",
   };
 
   const [results, setResults] = useState<Results>({
@@ -63,16 +58,12 @@ export default function App() {
     translations: {},
   });
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ["25%", "50%", "60%"], []);
-  const [selectedLanguage, setSelectedLanguage] = useState("portugues-br");
+  const snapPoints = useMemo(() => ["50%", "60%"], []);
+  const [selectedLanguage, setSelectedLanguage] = useState("Português (BR)");
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
-
-  // const handleSheetChanges = useCallback((index: number) => {
-  //   console.log("handleSheetChanges", index);
-  // }, []);
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
@@ -108,7 +99,7 @@ export default function App() {
         await imageClassification(uri);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -128,13 +119,12 @@ export default function App() {
         await imageClassification(uri);
       }
     } catch (_) {
-      console.log("File could not be selected");
+      console.error("File could not be selected");
     } finally {
       setIsLoading(false);
     }
   };
-  console.log("selectedLanguage", selectedLanguage);
-  console.log("results state", JSON.stringify(results));
+
   async function imageClassification(imageUri: string) {
     setResults({
       object: "",
@@ -148,23 +138,23 @@ export default function App() {
     {
       "object": "dog",
       "translations": {
-        "English": "dog",
-        "Spanish": "perro",
-        "French": "chien",
-        "German": "Hund",
-        "Chinese": "狗",
-        "portugues-br": "dog",
-        "portugues-pt": "dog",
-        "Italian": "Cane",
-        "Russian": "собака",
-        "Japanese": "犬",
-        "Korean": "개",
-        "Arabic": "كلب",
-        "hindi": "कुत्ता",
-        "Turkish": "Kopek",
-        "Polish": "pies",
-        "Dutch": "hond",
-        "Indonesian": "anjing"
+        "Inglês": "dog",
+        "Espanhol": "perro",
+        "Francês": "chien",
+        "Alemão": "Hund",
+        "Chinês": "狗",
+        "Português (BR)": "Cachorro",
+        "Português (PT)": "Cão",
+        "Italiano": "Cane",
+        "Russo": "собака",
+        "Japonês": "犬",
+        "Coreano": "개",
+        "Árabe": "كلب",
+        "Indiano": "कुत्ता",
+        "Turco": "Kopek",
+        "Polonês": "pies",
+        "Holandês": "hond",
+        "Indonésio": "anjing"
       }
   }
   please return only the json in the response, do not put ${aspas} json and ${aspas} at the end
@@ -180,26 +170,23 @@ export default function App() {
         mimeType: "image/png",
       },
     };
-    setSelectedLanguage("portugues-br");
+    setSelectedLanguage("Português (BR)");
     const result = await model.generateContent([prompt, image]);
-    console.log("result response", result);
-    console.log("result text", result.response.text());
-
-    // Verifique se o array candidates existe e se tem pelo menos um elemento
 
     if (result?.response?.candidates?.length > 0) {
       const parsedResult = result.response.text();
-      console.log("parsedResult", parsedResult);
-
-      // const parsedResult = JSON.parse(
-      //   result.response.candidates[0].content.parts[0].text
-      // );
-      // console.log("parsedResult", parsedResult);
       setResults(JSON.parse(parsedResult));
       handlePresentModalPress();
     } else {
       console.error("Nenhum resultado encontrado.");
     }
+  }
+
+  function chunkArray(array, chunkSize) {
+    return Array(Math.ceil(array.length / chunkSize))
+      .fill()
+      .map((_, index) => index * chunkSize)
+      .map((begin) => array.slice(begin, begin + chunkSize));
   }
 
   return (
@@ -235,10 +222,11 @@ export default function App() {
               index={1}
               backdropComponent={renderBackdrop}
               snapPoints={snapPoints}
-              // onChange={handleSheetChanges}
+              enableContentPanningGesture={false}
             >
               <BottomSheetScrollView style={stylesBottom.contentContainer}>
-                <ScrollView>
+                <View style={{ flex: 1, paddingLeft: 20 }}>
+                  <Text style={[styles.languague]}>{selectedLanguage}</Text>
                   <View
                     style={{
                       flex: 1,
@@ -250,11 +238,6 @@ export default function App() {
                     }}
                   >
                     <AudioIcon
-                      style={
-                        {
-                          // backgroundColor: "blue",
-                        }
-                      }
                       onPress={() =>
                         speak(results.translations[selectedLanguage])
                       }
@@ -277,37 +260,47 @@ export default function App() {
                         results.object}
                     </Text>
                   </View>
-
-                  <View
+                  <FlatList
+                    horizontal
                     style={{
-                      flexDirection: "row",
-                      flexWrap: "wrap",
-                      gap: 20,
-                      padding: 20,
-                      justifyContent: "space-evenly",
-                      marginTop: 20,
+                      paddingTop: 20,
+                      paddingBottom: 20,
+                      paddingRight: 20,
                     }}
-                  >
-                    {results &&
-                      results.translations &&
-                      Object.keys(results.translations).map((language) => (
-                        <TouchableOpacity
-                          key={language}
-                          onPress={() => handleLanguageChange(language)}
-                        >
-                          <Text
+                    data={chunkArray(Object.keys(results.translations), 2)}
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <FlatList
+                        horizontal
+                        data={item}
+                        style={{ gap: 20 }}
+                        keyExtractor={(language) => language}
+                        renderItem={({ item: language }) => (
+                          <TouchableOpacity
                             style={[
                               styles.languageButton,
                               selectedLanguage === language &&
-                                styles.selectedLanguage,
+                                styles.languageButtonSelected,
                             ]}
+                            onPress={() => handleLanguageChange(language)}
                           >
-                            {language}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                  </View>
-                </ScrollView>
+                            {iconLanguage[language]}
+                          </TouchableOpacity>
+                        )}
+                        contentContainerStyle={{
+                          flexDirection: "row",
+                          justifyContent: "space-evenly",
+                          gap: 20,
+                        }}
+                      />
+                    )}
+                    contentContainerStyle={{
+                      marginTop: 20,
+                      gap: 20,
+                      paddingRight: 20,
+                    }}
+                  />
+                </View>
               </BottomSheetScrollView>
             </BottomSheetModal>
           </View>
