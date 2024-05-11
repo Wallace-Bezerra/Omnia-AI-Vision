@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     width: 300,
     height: 400,
     borderRadius: 8,
-    marginTop: 20,
+    marginTop: 60,
     objectFit: "cover",
   },
   results: {

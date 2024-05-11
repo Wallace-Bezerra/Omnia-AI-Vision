@@ -77,10 +77,8 @@ export default function App() {
   );
 
   const speak = (text: string) => {
-    const availableVoices = Speech.getAvailableVoicesAsync();
     Speech.speak(text, {
       language: tags[selectedLanguage],
-      // voice: "pt-br-x-ptd-local"
     });
   };
 
@@ -136,25 +134,25 @@ export default function App() {
     
     Describe an image of an object in one word and generate a JSON file that follows the following format:
     {
-      "object": "dog",
+      "object": "Cachorro",
       "translations": {
-        "Inglês": "dog",
-        "Espanhol": "perro",
-        "Francês": "chien",
+        "Inglês": "Dog",
+        "Espanhol": "Perro",
+        "Francês": "Chien",
         "Alemão": "Hund",
         "Chinês": "狗",
         "Português (BR)": "Cachorro",
         "Português (PT)": "Cão",
         "Italiano": "Cane",
-        "Russo": "собака",
+        "Russo": "Cобака",
         "Japonês": "犬",
         "Coreano": "개",
         "Árabe": "كلب",
         "Indiano": "कुत्ता",
         "Turco": "Kopek",
-        "Polonês": "pies",
-        "Holandês": "hond",
-        "Indonésio": "anjing"
+        "Polonês": "Pies",
+        "Holandês": "Hond",
+        "Indonésio": "Anjing"
       }
   }
   please return only the json in the response, do not put ${aspas} json and ${aspas} at the end
@@ -194,7 +192,7 @@ export default function App() {
       <View style={styles.container}>
         <StatusBar style="light" backgroundColor="#1077ae" translucent />
         <View style={styles.header}>
-          <Text style={styles.title}>Omnia AI Vision</Text>
+          <Text style={styles.title}>OMNIA AI VISION</Text>
         </View>
         <Image
           source={{
@@ -208,11 +206,19 @@ export default function App() {
           <View style={stylesBottom.container}>
             {results?.object && (
               <TouchableOpacity
-                style={{ backgroundColor: "transparent", padding: 20 }}
+                style={{
+                  backgroundColor: "#1077ae",
+                  paddingVertical: 14,
+                  paddingHorizontal: 20,
+                  borderRadius: 10,
+                  marginTop: 40,
+                }}
                 onPress={handlePresentModalPress}
               >
-                <Text style={{ color: "white", fontSize: 20 }}>
-                  Ver Resultado...
+                <Text
+                  style={{ color: "white", fontWeight: "bold", fontSize: 22 }}
+                >
+                  RESULTADO
                 </Text>
               </TouchableOpacity>
             )}
@@ -225,82 +231,84 @@ export default function App() {
               enableContentPanningGesture={false}
             >
               <BottomSheetScrollView style={stylesBottom.contentContainer}>
-                <View style={{ flex: 1, paddingLeft: 20 }}>
-                  <Text style={[styles.languague]}>{selectedLanguage}</Text>
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 10,
-                      paddingTop: 20,
-                    }}
-                  >
-                    <AudioIcon
-                      onPress={() =>
-                        speak(results.translations[selectedLanguage])
-                      }
-                      width={50}
-                      height={30}
-                    />
-                    <Text
+                {!isLoading && (
+                  <View style={{ flex: 1, paddingLeft: 20 }}>
+                    <Text style={[styles.languague]}>{selectedLanguage}</Text>
+                    <View
                       style={{
-                        color: "black",
-                        fontSize: 26,
-                        lineHeight: 26,
-                        paddingVertical: 12,
-                        paddingHorizontal: 20,
-                        textAlign: "center",
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 10,
+                        paddingTop: 20,
                       }}
                     >
-                      {(results &&
-                        results.translations &&
-                        results.translations[selectedLanguage]) ||
-                        results.object}
-                    </Text>
-                  </View>
-                  <FlatList
-                    horizontal
-                    style={{
-                      paddingTop: 20,
-                      paddingBottom: 20,
-                      paddingRight: 20,
-                    }}
-                    data={chunkArray(Object.keys(results.translations), 2)}
-                    keyExtractor={(_, index) => index.toString()}
-                    renderItem={({ item }) => (
-                      <FlatList
-                        horizontal
-                        data={item}
-                        style={{ gap: 20 }}
-                        keyExtractor={(language) => language}
-                        renderItem={({ item: language }) => (
-                          <TouchableOpacity
-                            style={[
-                              styles.languageButton,
-                              selectedLanguage === language &&
-                                styles.languageButtonSelected,
-                            ]}
-                            onPress={() => handleLanguageChange(language)}
-                          >
-                            {iconLanguage[language]}
-                          </TouchableOpacity>
-                        )}
-                        contentContainerStyle={{
-                          flexDirection: "row",
-                          justifyContent: "space-evenly",
-                          gap: 20,
-                        }}
+                      <AudioIcon
+                        onPress={() =>
+                          speak(results.translations[selectedLanguage])
+                        }
+                        width={50}
+                        height={30}
                       />
-                    )}
-                    contentContainerStyle={{
-                      marginTop: 20,
-                      gap: 20,
-                      paddingRight: 20,
-                    }}
-                  />
-                </View>
+                      <Text
+                        style={{
+                          color: "black",
+                          fontSize: 26,
+                          lineHeight: 26,
+                          paddingVertical: 12,
+                          paddingHorizontal: 20,
+                          textAlign: "center",
+                        }}
+                      >
+                        {(results &&
+                          results.translations &&
+                          results.translations[selectedLanguage]) ||
+                          results.object}
+                      </Text>
+                    </View>
+                    <FlatList
+                      horizontal
+                      style={{
+                        paddingTop: 20,
+                        paddingBottom: 20,
+                        paddingRight: 20,
+                      }}
+                      data={chunkArray(Object.keys(results.translations), 2)}
+                      keyExtractor={(_, index) => index.toString()}
+                      renderItem={({ item }) => (
+                        <FlatList
+                          horizontal
+                          data={item}
+                          style={{ gap: 20 }}
+                          keyExtractor={(language) => language}
+                          renderItem={({ item: language }) => (
+                            <TouchableOpacity
+                              style={[
+                                styles.languageButton,
+                                selectedLanguage === language &&
+                                  styles.languageButtonSelected,
+                              ]}
+                              onPress={() => handleLanguageChange(language)}
+                            >
+                              {iconLanguage[language]}
+                            </TouchableOpacity>
+                          )}
+                          contentContainerStyle={{
+                            flexDirection: "row",
+                            justifyContent: "space-evenly",
+                            gap: 20,
+                          }}
+                        />
+                      )}
+                      contentContainerStyle={{
+                        marginTop: 20,
+                        gap: 20,
+                        paddingRight: 20,
+                      }}
+                    />
+                  </View>
+                )}
               </BottomSheetScrollView>
             </BottomSheetModal>
           </View>
