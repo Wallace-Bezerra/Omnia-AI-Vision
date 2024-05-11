@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -38,6 +36,7 @@
       [
         "expo-image-picker",
         {
+          "permission": "Permitir que o aplicativo acesse suas fotos e mídia",
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ]

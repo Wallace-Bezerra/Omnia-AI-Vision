@@ -1,3 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const genAI = new GoogleGenerativeAI("AIzaSyByYvjFTqkb4g7fvedGLm3ozmDWgUsD0TM")
+const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || "";
+
+export const genAI = new GoogleGenerativeAI(API_KEY);
