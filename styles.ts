@@ -1,16 +1,15 @@
 import { StyleSheet } from "react-native";
-
+import { RFValue } from "react-native-responsive-fontsize";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#171717",
     alignItems: "center",
     justifyContent: "center",
-    // padding: 32
   },
   header: {
     width: "100%",
-    height: 90,
+    height: RFValue(60),
     backgroundColor: "#1077ae",
     alignItems: "center",
     justifyContent: "center",
@@ -18,20 +17,19 @@ export const styles = StyleSheet.create({
   title: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 20,
-    marginTop: 25,
+    fontSize: RFValue(20),
   },
   image: {
     width: 300,
     height: 400,
     borderRadius: 8,
-    marginTop: 60,
+    marginTop: RFValue(60),
     objectFit: "cover",
   },
   results: {
     flex: 1,
     gap: 16,
-    marginTop: 64,
+    marginTop: RFValue(64),
     paddingHorizontal: 40,
   },
   languageButton: {
@@ -58,8 +56,8 @@ export const styles = StyleSheet.create({
     color: "white",
   },
   languague: {
-    paddingTop: 20,
-    fontSize: 26,
+    paddingTop: RFValue(20),
+    fontSize: RFValue(26),
     textTransform: "uppercase",
     fontWeight: "bold",
     textAlign: "center",

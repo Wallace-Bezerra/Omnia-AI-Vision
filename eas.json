@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 9.0.3"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "staging",
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyDW0iUbFqRiXrlHhLdPPRoMrCfpbWPC45k"
+      }
+    },
+    "production": {
+      "distribution": "internal",
+      "channel": "staging",
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyDW0iUbFqRiXrlHhLdPPRoMrCfpbWPC45k"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

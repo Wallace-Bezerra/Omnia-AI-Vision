@@ -15,6 +15,7 @@ import Pt from "../assets/country/pt-.svg";
 import Br from "../assets/country/pt.svg";
 import Ru from "../assets/country/ru.svg";
 import Tr from "../assets/country/tr.svg";
+import { LanguageKey } from "../types/types";
 
 export const iconLanguage = {
   Inglês: <En width={50} height={40} />,
@@ -34,4 +35,24 @@ export const iconLanguage = {
   Polonês: <Pl width={50} height={40} />,
   Holandês: <Nl width={50} height={40} />,
   Indonésio: <Id width={50} height={40} />,
+};
+
+export const tags: { [key in LanguageKey]: string } = {
+  Inglês: "en",
+  Espanhol: "es",
+  Francês: "fr",
+  Alemão: "de",
+  Chinês: "zh",
+  "Português (BR)": "pt-BR",
+  "Português (PT)": "pt-PT",
+  Italiano: "it",
+  Russo: "ru",
+  Japonês: "ja",
+  Coreano: "ko",
+  Árabe: "ar",
+  Indiano: "hi",
+  Turco: "tr",
+  Polonês: "pl",
+  Holandês: "nl",
+  Indonésio: "id",
 };

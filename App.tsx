@@ -1,8 +1,6 @@
-import { JSX, useCallback, useMemo, useRef, useState } from "react";
+import { JSX, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import * as Speech from "expo-speech";
 import {
-  StyleSheet,
   Text,
   View,
   Image,
@@ -11,61 +9,47 @@ import {
   FlatList,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { styles } from "./styles";
-import AudioIcon from "./assets/icons/audio-icon.svg";
-
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetBackdrop,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
-
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
-import { genAI } from "./lib/gemini";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
-import { Results } from "./types/types";
-import { iconLanguage } from "./utils/getIcon";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useImageClassification } from "./src/services/imageClassification";
+import { useImagePicker } from "./src/services/imagePicker";
+import { styles } from "./styles";
+import AudioIcon from "./src/assets/icons/audio-icon.svg";
+import { stylesBottom } from "./src/styles/bottomSheet";
+import { iconLanguage } from "./src/utils/languageUtils";
+import { chunkArray } from "./src/utils/utils";
+import { LanguageKey } from "./src/types/types";
+import { speakService } from "./src/services/speak";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { RFValue } from "react-native-responsive-fontsize";
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState("");
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<LanguageKey>("Português (BR)");
 
-  const tags = {
-    Inglês: "en",
-    Espanhol: "es",
-    Francês: "fr",
-    Alemão: "de",
-    Chinês: "zh",
-    "Português (BR)": "pt",
-    "Português (PT)": "pt",
-    Italiano: "it",
-    Russo: "ru",
-    Japonês: "ja",
-    Coreano: "ko",
-    Árabe: "ar",
-    Indiano: "hi",
-    Turco: "tr",
-    Polonês: "pl",
-    Holandês: "nl",
-    Indonésio: "id",
-  };
-
-  const [results, setResults] = useState<Results>({
-    object: "",
-    translations: {},
-  });
+  const { pickImageFromLibrary, takePicture } = useImagePicker();
+  const { classifyImage, results, isLoading } = useImageClassification();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["50%", "60%"], []);
-  const [selectedLanguage, setSelectedLanguage] = useState("Português (BR)");
+
+  useEffect(() => {
+    if (results.object) {
+      handlePresentModalPress();
+    }
+  }, [results]);
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
 
-  const handleLanguageChange = (language: string) => {
+  const handleLanguageChange = (language: LanguageKey) => {
     setSelectedLanguage(language);
   };
 
@@ -76,120 +60,25 @@ export default function App() {
     []
   );
 
-  const speak = (text: string) => {
-    Speech.speak(text, {
-      language: tags[selectedLanguage],
-    });
-  };
-
-  async function handleSelectImage() {
-    setIsLoading(true);
-
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-      });
-
-      if (!result.canceled) {
-        const { uri } = result.assets[0];
-        setSelectedImageUri(uri);
-        await imageClassification(uri);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+  const handleSelectImage = async () => {
+    const uri = await pickImageFromLibrary();
+    if (uri) {
+      setSelectedImageUri(uri);
+      classifyImage(uri);
     }
-  }
+  };
 
   const pickCamera = async () => {
-    setIsLoading(true);
-    try {
-      let result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-      });
-
-      if (!result.canceled) {
-        const { uri } = result.assets[0];
-        setSelectedImageUri(uri);
-        await imageClassification(uri);
-      }
-    } catch (_) {
-      console.error("File could not be selected");
-    } finally {
-      setIsLoading(false);
+    const uri = await takePicture();
+    if (uri) {
+      setSelectedImageUri(uri);
+      classifyImage(uri);
     }
   };
-
-  async function imageClassification(imageUri: string) {
-    setResults({
-      object: "",
-      translations: {},
-    });
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-    const aspas = " ``` ";
-    const prompt = `You are developing an application that requires the translation of objects identified in images into different languages. The objective is to receive the description of an object in a single word and generate a JSON file containing all possible translations of that object in the 15 most popular languages.
-    
-    Describe an image of an object in one word and generate a JSON file that follows the following format:
-    {
-      "object": "Cachorro",
-      "translations": {
-        "Inglês": "Dog",
-        "Espanhol": "Perro",
-        "Francês": "Chien",
-        "Alemão": "Hund",
-        "Chinês": "狗",
-        "Português (BR)": "Cachorro",
-        "Português (PT)": "Cão",
-        "Italiano": "Cane",
-        "Russo": "Cобака",
-        "Japonês": "犬",
-        "Coreano": "개",
-        "Árabe": "كلب",
-        "Indiano": "कुत्ता",
-        "Turco": "Kopek",
-        "Polonês": "Pies",
-        "Holandês": "Hond",
-        "Indonésio": "Anjing"
-      }
-  }
-  please return only the json in the response, do not put ${aspas} json and ${aspas} at the end
-    `;
-
-    const imageBase64 = await FileSystem.readAsStringAsync(imageUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-
-    const image = {
-      inlineData: {
-        data: imageBase64,
-        mimeType: "image/png",
-      },
-    };
-    setSelectedLanguage("Português (BR)");
-    const result = await model.generateContent([prompt, image]);
-
-    if (result?.response?.candidates?.length > 0) {
-      const parsedResult = result.response.text();
-      setResults(JSON.parse(parsedResult));
-      handlePresentModalPress();
-    } else {
-      console.error("Nenhum resultado encontrado.");
-    }
-  }
-
-  function chunkArray(array, chunkSize) {
-    return Array(Math.ceil(array.length / chunkSize))
-      .fill()
-      .map((_, index) => index * chunkSize)
-      .map((begin) => array.slice(begin, begin + chunkSize));
-  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <StatusBar style="light" backgroundColor="#1077ae" translucent />
         <View style={styles.header}>
           <Text style={styles.title}>OMNIA AI VISION</Text>
@@ -216,13 +105,16 @@ export default function App() {
                 onPress={handlePresentModalPress}
               >
                 <Text
-                  style={{ color: "white", fontWeight: "bold", fontSize: 22 }}
+                  style={{
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: RFValue(22),
+                  }}
                 >
                   RESULTADO
                 </Text>
               </TouchableOpacity>
             )}
-
             <BottomSheetModal
               ref={bottomSheetModalRef}
               index={1}
@@ -232,47 +124,57 @@ export default function App() {
             >
               <BottomSheetScrollView style={stylesBottom.contentContainer}>
                 {!isLoading && (
-                  <View style={{ flex: 1, paddingLeft: 20 }}>
+                  <View style={{ flex: 1 }}>
                     <Text style={[styles.languague]}>{selectedLanguage}</Text>
                     <View
                       style={{
-                        flex: 1,
                         flexDirection: "row",
-                        justifyContent: "center",
+                        paddingRight: 20,
                         alignItems: "center",
-                        gap: 10,
-                        paddingTop: 20,
+                        justifyContent: "center",
                       }}
                     >
-                      <AudioIcon
-                        onPress={() =>
-                          speak(results.translations[selectedLanguage])
-                        }
-                        width={50}
-                        height={30}
-                      />
-                      <Text
+                      <View
                         style={{
-                          color: "black",
-                          fontSize: 26,
-                          lineHeight: 26,
-                          paddingVertical: 12,
-                          paddingHorizontal: 20,
-                          textAlign: "center",
+                          flex: 1,
+                          flexDirection: "row",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 10,
+                          paddingTop: 20,
                         }}
                       >
-                        {(results &&
-                          results.translations &&
-                          results.translations[selectedLanguage]) ||
-                          results.object}
-                      </Text>
+                        <AudioIcon
+                          onPress={() =>
+                            speakService(
+                              results.translations[selectedLanguage],
+                              selectedLanguage
+                            )
+                          }
+                          width={50}
+                          height={30}
+                        />
+                        <Text
+                          style={{
+                            color: "black",
+                            fontSize: RFValue(26),
+                            lineHeight: 26,
+                            paddingVertical: 12,
+                            paddingHorizontal: 20,
+                            textAlign: "center",
+                          }}
+                        >
+                          {(results &&
+                            results.translations &&
+                            results.translations[selectedLanguage]) ||
+                            results.object}
+                        </Text>
+                      </View>
                     </View>
                     <FlatList
                       horizontal
                       style={{
-                        paddingTop: 20,
-                        paddingBottom: 20,
-                        paddingRight: 20,
+                        padding: RFValue(20),
                       }}
                       data={chunkArray(Object.keys(results.translations), 2)}
                       keyExtractor={(_, index) => index.toString()}
@@ -289,9 +191,11 @@ export default function App() {
                                 selectedLanguage === language &&
                                   styles.languageButtonSelected,
                               ]}
-                              onPress={() => handleLanguageChange(language)}
+                              onPress={() =>
+                                handleLanguageChange(language as LanguageKey)
+                              }
                             >
-                              {iconLanguage[language]}
+                              {iconLanguage[language as LanguageKey]}
                             </TouchableOpacity>
                           )}
                           contentContainerStyle={{
@@ -313,7 +217,6 @@ export default function App() {
             </BottomSheetModal>
           </View>
         </BottomSheetModalProvider>
-
         {isLoading ? (
           <ActivityIndicator
             color="#1077ae"
@@ -349,7 +252,6 @@ export default function App() {
             >
               <Feather name="camera" size={30} color="white" />
             </TouchableOpacity>
-
             <TouchableOpacity
               onPress={handleSelectImage}
               style={{
@@ -366,16 +268,7 @@ export default function App() {
             </TouchableOpacity>
           </View>
         )}
-      </View>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
-
-const stylesBottom = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    marginBottom: 100,
-  },
-});

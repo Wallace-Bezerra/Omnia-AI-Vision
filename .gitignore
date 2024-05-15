@@ -34,3 +34,24 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# CocoaPods
+/ios/Pods/
+
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+*.iml
+*.hprof
+.cxx/
+
+# @end expo-cli
+# Ignore Gradle build output directory
+build
+
+android
+ios
+
