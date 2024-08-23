@@ -15,7 +15,7 @@
         "image": "latest"
       },
       "env": {
-        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyDW0iUbFqRiXrlHhLdPPRoMrCfpbWPC45k"
+        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyDo4xHEoDClDdrr7ybufMspFmUcNxTm-_Y"
       }
     },
     "production": {
